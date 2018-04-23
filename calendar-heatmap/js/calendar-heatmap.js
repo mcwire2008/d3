@@ -1,16 +1,20 @@
 /** loading json data object **/
 var dataList = [];
-(function generateData () {
+function generateData(year) {
 	var days = [], months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
 	for (var a=1; a<30;a++) { var a2 = (a < 10 ? "0"+a : a); days.push(a2);}
 	
-	for(var i=0; i< 280; i++) {
+	for(var i=0; i< 12; i++) {
 		for(var j=1; j<=12; j++){
 			var mR = Math.round(Math.random(12) * j);
 			if(mR <= 0) continue;
 			dataList.push({
 				Id: 125 + j,
-				Date: "2018-".concat(months[Math.floor(Math.random() * months.length)]).concat("-").concat(days[Math.floor(Math.random() * days.length)]),
+				Date: year.toString()
+					.concat("-")
+					.concat(months[Math.floor(Math.random() * months.length)])
+					.concat("-")
+					.concat(days[Math.floor(Math.random() * days.length)]),
 				Open: 125 * mR * Math.random(4),
 				Low: 125 * mR * Math.random(4),
 				Close: 125 * mR * Math.random(4*j),
@@ -18,9 +22,10 @@ var dataList = [];
 			})
 		}
 	}
-	//console.log(JSON.stringify(dataList, {}, true));
-})()
+	console.log(JSON.stringify(dataList, {}, true));
+}
 
+generateData(2018);
 
 //////////////////////////////////////////// end of data ////////////////////////////
 
