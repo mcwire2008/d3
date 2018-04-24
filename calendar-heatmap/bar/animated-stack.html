@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<body>
+  <div id="info">
+  </div>
+  <div id="race_graph">
+  </div>
+  <div id="pie">
+  </div>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script>
+    // set the dimensions and margins of the graph
+    var margin = {
+        top: 50,
+        right: 50,
+        bottom: 100,
+        left: 80
+      },
+      width = 500 - margin.left - margin.right,
+      height = 600 - margin.top - margin.bottom;
+
+    // Get the data
+    var data = [{
+        "name": "RT",
+        "clocktime": "21:33",
+        "handicap": "05:30",
+        "racetime": "09:03"
+      },
+      {
+        "name": "Ken Doe",
+        "clocktime": "18:13",
+        "handicap": "04:45",
+        "racetime": "11:28"
+      },
+      {
+        "name": "SD",
+        "clocktime": "20:15",
+        "handicap": "01:45",
+        "racetime": "10:30"
+      },
+      {
+        "name": "DK",
+        "clocktime": "15:20",
+        "handicap": "02:45",
+        "racetime": "09:35"
+      },
+      {
+        "name": "BD",
+        "clocktime": "17:21",
+        "handicap": "02:15",
+        "racetime": "10:06"
+      },
+      {
+        "name": "KC",
+        "clocktime": "15:21",
+        "handicap": "02:00",
+        "racetime": "10:21"
+      },
+      {
+        "name": "PM",
+        "clocktime": "18:22",
+        "handicap": "03:45",
+        "racetime": "11:37"
+      },
+      {
+        "name": "NR",
+        "clocktime": "17:23",
+        "handicap": "01:45",
+        "racetime": "10:38"
+      }
+    ]
+
+
+    var parseTime = d3.timeParse("%M:%S");
+    var timeformat = d3.timeFormat("%M:%S")
+
+    // format the data
+    data.forEach(function(d) {
+      d.racetime = parseTime(d.racetime);
+      d.handicap = parseTime(d.handicap);
+      d.clocktime = parseTime(d.clocktime);
+    });
+
+    // set the domains and ranges
+    var x = d3.scaleBand()
+      .domain(data.map(function(d) {
+        return d.name
+      }))
+      .range([0, width]);
+
+    // temporal y-scale
+    var y = d3.scaleTime()
+      .domain([parseTime('00:00'), d3.max(data, function(d) {
+        return d.clocktime
+        // return d.handicap
+      })])
+      .range([height, 0]);
+
+    //****************************
+    //***** Main Graph setup *****
+    //****************************
+
+    var svg = d3.select("#race_graph")
+      .data(data)
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+
+
+    var g0 = svg.append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var g1 = svg.append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var g2 = svg.append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Add the X Axis
+    var xAxis = d3.axisBottom(x)
+    svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(" + margin.left + "," + (height + margin.top) + ")")
+      .call(xAxis)
+      .selectAll("text")
+      .style("text-anchor", "end")
+      .style("font", "20px times")
+      .attr("class", function(d, i) {
+        return "groupText" + i + " xAxisText"
+      })
+      .attr("dx", "-.8em")
+      .attr("dy", ".15em")
+      .attr("transform", "rotate(-65)");
+
+    // Add the left Y Axis
+    svg.append("g")
+      .attr("class", "axis")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+      .call(d3.axisLeft(y)
+        .ticks(7)
+        .tickFormat(d3.timeFormat("%M:%S")));
+
+    // text label for the y axis on left
+    svg.append("text")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin.left)
+      .attr("x", 0 - (height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Time (minutes:seconds)");
+
+
+    var tooltip = d3.select("#info")
+      .append("div")
+      .style("position", "absolute")
+      .style("z-index", "10")
+      .style("visibility", "hidden");
+
+    //************************************************************
+    //******* BarChart by clocktime *******************************
+    //************************************************************
+
+    var newRects0 = g0.selectAll(".bar")
+      .data(data)
+      .enter();
+    // Note: y2(d.points) is the y coordinate of rect
+    newRects0.append('rect')
+      .attr('x', function(d, i) {
+        return x(d.name);
+      })
+      .attr('width', 30)
+      .attr('y', height)
+      .attr('height', 0)
+      .attr("transform", "translate(3,0)")
+      .style('fill', 'gray')
+      .attr("class", function(d, i) {
+        return "group" + i + " bar"
+      })
+      .on("mouseover", function(d, i, node) { //this is repeated should be in a function
+        d3.selectAll(".bar").transition()
+          .style("opacity", 0.3);
+        d3.selectAll(".xAxisText").transition()
+          .style("fill", "lightgray")
+          .style("font-weight", "100"); //all groups given opacity 0
+        d3.selectAll(".groupText" + i)
+          .transition()
+          .style("font-weight", "900")
+          .style("fill", "black"); //give opacity 1 to group on which it hovers.
+        d3.selectAll(".group" + i)
+          .transition()
+          .style("opacity", 1);
+        return tooltip
+          .style("visibility", "visible")
+          .html("<span style=font-size:30px;> " + "name: " + d.name +
+            " (on gray bar)</span>");
+      })
+      .on("mouseout", function(d) {
+        d3.selectAll(".bar").transition()
+          .style("opacity", 1);
+        d3.selectAll(".xAxisText").transition()
+          .style("fill", "black")
+          .style("font-weight", "normal");
+        return tooltip.style("visibility", "hidden");
+      })
+      .transition()
+      .duration(1000)
+      .delay(function(d, i) {
+        return i * 15
+      })
+      .attr('y', function(d, i) {
+        return y(d.clocktime);
+      })
+      .attr('height', function(d, i) {
+        return height - y(d.clocktime)
+      });
+
+    function isInArray(value, array) {
+      return array.indexOf(value) > -1;
+    }
+    //************************************************************
+    //******* BarChart by racetime *******************************
+    //************************************************************
+
+    var newRects1 = g1.selectAll(".bar")
+      .data(data)
+      .enter();
+
+    // Note: y2(d.points) is the y coordinate of rect
+    newRects1.append('rect')
+      .attr('x', function(d, i) {
+        return x(d.name);
+      })
+      .attr('width', 30)
+      .attr("transform", "translate(10,0)")
+      .attr('y', height)
+      .attr('height', 0)
+      .style('fill', 'salmon')
+      .attr("class", function(d, i) {
+        return "group" + i + " bar"
+      })
+      .on("mouseover", function(d, i, node) { //this is repeated should be in a function
+        d3.selectAll(".bar").transition()
+          .style("opacity", 0.3);
+        d3.selectAll(".xAxisText").transition()
+          .style("fill", "lightgray")
+          .style("font-weight", "100"); //all groups given opacity 0
+        d3.selectAll(".groupText" + i)
+          .transition()
+          .style("font-weight", "900")
+          .style("fill", "black"); //give opacity 1 to group on which it hovers.
+        d3.selectAll(".group" + i)
+          .transition()
+          .style("opacity", 1);
+        return tooltip
+          .style("visibility", "visible")
+          .html("<span style=font-size:30px;> " + "name: " + d.name +
+            " (on salmon bar)</span>");
+      })
+      .on("mouseout", function(d) {
+        d3.selectAll(".bar").transition()
+          .style("opacity", 1);
+        d3.selectAll(".xAxisText").transition()
+          .style("fill", "black")
+          .style("font-weight", "normal");
+        return tooltip.style("visibility", "hidden");
+      })
+      .transition()
+      .duration(1500)
+      .delay(function(d, i) {
+        return i * 15
+      })
+      .attr('y', function(d, i) {
+        return y(d.racetime);
+      })
+      .attr('height', function(d, i) {
+        return height - y(d.racetime)
+      });
+
+    //************************************************************
+    //******* BarCharts by handicap ******************************
+    //************************************************************
+    var newRects2 = g2.selectAll(".bar")
+      .data(data)
+      .enter();
+
+    newRects2.append('rect')
+      .attr('x', function(d, i) {
+        return x(d.name);
+      })
+      .attr('y', function(d, i) {
+        return height
+      })
+      .attr('width', 30)
+      .attr('height', 0)
+      .attr("transform", "translate(17,0)")
+      .style('fill', 'blue')
+      .attr("class", function(d, i) {
+        return "group" + i + " bar"
+      })
+      .on("mouseover", function(d, i, node) { //this is repeated should be in a function
+        d3.selectAll(".bar").transition()
+          .style("opacity", 0.3);
+        d3.selectAll(".xAxisText").transition()
+          .style("fill", "lightgray")
+          .style("font-weight", "100"); //all groups given opacity 0
+        d3.selectAll(".groupText" + i)
+          .transition()
+          .style("font-weight", "900")
+          .style("fill", "black"); //give opacity 1 to group on which it hovers.
+        d3.selectAll(".group" + i)
+          .transition()
+          .style("opacity", 1);
+        return tooltip
+          .style("visibility", "visible")
+          .html("<span style=font-size:30px;> " + "name: " + d.name +
+            " (on blue bar)</span>");
+      })
+      .on("mouseout", function(d) {
+        d3.selectAll(".bar").transition()
+          .style("opacity", 1);
+        d3.selectAll(".xAxisText").transition()
+          .style("fill", "black")
+          .style("font-weight", "normal");
+        return tooltip.style("visibility", "hidden");
+      })
+      .transition()
+      .duration(2000)
+      .delay(function(d, i) {
+        return i * 15
+      })
+      .attr('y', function(d, i) {
+        return y(d.handicap);
+      })
+      .attr('height', function(d, i) {
+        return height - y(d.handicap)
+
+      });
+  </script>
+</body>
