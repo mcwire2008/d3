@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+<style>
+text {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  fill: #454545;
+}
+
+rect {
+  cursor: pointer;
+}
+
+.axis.x .tick line,
+.axis.y .tick:last-child line {
+  display: none;
+}
+
+.axis.x .domain,
+.axis.y .tick line {
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+.axis.x .domain {
+  stroke: #8d9697;
+}
+
+.axis.y .tick line {
+  stroke: #e3e5e5;
+  stroke-dasharray: 2px;
+}
+
+.axis.y .domain {
+  stroke: none;
+}
+
+.line {
+  stroke-linecap: round;
+  shape-rendering: geometricPrecision;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+  <script src="http://d3js.org/d3.v4.min.js"></script>
+  <script src="js/interactive-bar.js"></script>
+</body>
+</html>

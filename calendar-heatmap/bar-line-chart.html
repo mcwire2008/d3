@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bar with line chart example</title>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<style type="text/css">
+.bar {
+  fill: tomato;
+}
+.bar:hover {
+  fill: turquoise;
+}
+.text {
+  font-size: 100%;
+}
+.container {
+  margin: 0 auto;
+  text-align: center;
+}
+.axis--y line {
+  stroke-opacity: 0.2;
+}
+.axis--y path {
+  stroke: none;
+}
+  svg {
+    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));  
+  }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <svg width="960" height="500"></svg>
+</div>
+
+<script src="js/bar-line.js"></script>
+
+</body>
+</html>
