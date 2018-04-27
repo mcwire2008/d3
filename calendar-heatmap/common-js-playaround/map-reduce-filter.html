@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+<script>
+  var jsonData = [{
+    recId: 1,
+    eventDate: "2017-10-20",
+    events: [{
+      description: "Hello 11"
+    }, {
+      description: "Hello 111"
+    }]
+  },{
+    recId: 4,
+    eventDate: "2018-10-20",
+    events: [{
+      description: "Hello 33"
+    }, {
+      description: "Hello 333"
+    }]
+  }, {
+	    recId: 5,
+	    eventDate: "2015-11-20",
+	    events: [{
+	      description: "Hello 44"
+	    }, {
+	      description: "Hello 444"
+	    }]
+	  }, {
+		    recId: 51,
+		    eventDate: "2012-10-20",
+		    events: [{
+		      description: "Hello 55"
+		    }, {
+		      description: "Hello 555"
+		    }]
+		  }];
+</script>
+</head>
+<body>
+<script>
+  var currYear = "2018", result = [];
+  var json2018 = jsonData.filter( (rec) => rec['eventDate'].indexOf(currYear) > -1 );
+  var jsonNot2018 = jsonData.filter( (rec) => rec['eventDate'].indexOf(currYear) < 0 ); 
+  
+  json2018.forEach ( (rec) => {
+    rec['events'].forEach( (event) => event['eventDate'] = rec['eventDate'] );
+  });
+  
+  jsonNot2018.forEach( (rec) => {
+    var matched=false, ed1 = rec['eventDate'].split("-");
+    rec['events'].forEach( (event) => event['eventDate'] = rec['eventDate'] );
+    for(var i=0; i<json2018.length; i++) {
+    	var rec2 = json2018[i];
+      var ed2 = rec2['eventDate'].split("-");
+      matched = false;
+      if(ed1[0] !== ed2[0] && ed1[1] === ed2[1]) {
+        rec2['events'].push.apply(rec2['events'], rec['events']);
+        matched = true;
+        break;
+      }
+    }
+    if(!matched) {
+      rec["eventDate"] = rec["eventDate"].replace(ed1[0], currYear); 
+      json2018.push(rec);
+    }
+  });
+  json2018.forEach ((rec) => rec["count"] = rec["events"].length);
+ 
+  console.log("1 -> ", JSON.stringify(json2018, undefined, 2))
+
+  </script>
+ done
+</body>
+</html>
